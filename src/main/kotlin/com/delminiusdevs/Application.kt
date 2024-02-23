@@ -1,5 +1,7 @@
 package com.delminiusdevs
 
+import com.delminiusdevs.data.NoteDAO
+import com.delminiusdevs.data.NotesDatabase
 import com.delminiusdevs.plugins.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -10,6 +12,12 @@ fun main() {
         .start(wait = true)
 }
 
+val database: NoteDAO = NotesDatabase()
+
 fun Application.module() {
+    configureHeaders()
+    configureCallLogging()
+    configureContentNegotiation()
+    configureAuth()
     configureRouting()
 }
