@@ -18,6 +18,6 @@ fun Application.module() {
     configureHeaders()
     configureCallLogging()
     configureContentNegotiation()
-    configureAuth()
+    configureAuthentication()
     configureRouting()
 }

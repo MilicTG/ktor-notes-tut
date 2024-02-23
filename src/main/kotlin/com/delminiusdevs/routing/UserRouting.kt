@@ -1,6 +1,7 @@
 package com.delminiusdevs.routing
 
 import com.delminiusdevs.data.model.User
+import com.delminiusdevs.data.requests.UserLogInRequest
 import com.delminiusdevs.data.requests.UserRegisterRequest
 import com.delminiusdevs.database
 import com.delminiusdevs.util.getSaltWithHash
@@ -13,6 +14,23 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.userRoutes() {
+
+    post("/login") {
+        val userLogInRequest = try {
+            call.receive<UserLogInRequest>()
+
+        } catch (e: ContentTransformationException) {
+            call.respond(HttpStatusCode.BadRequest)
+            return@post
+        }
+
+        if (database.checkPasswordForEmail(email = userLogInRequest.email, password = userLogInRequest.password)) {
+            call.respond(HttpStatusCode.OK)
+            return@post
+        }
+
+        call.respond(HttpStatusCode.Unauthorized)
+    }
 
     post("/register") {
         val userRegisterRequest = try {
