@@ -43,6 +43,7 @@ fun Route.userRoutes() {
 
         if (database.checkIfEmailExist(userRegisterRequest.email)) {
             call.respond(HttpStatusCode.Conflict)
+            return@post
         }
 
         val emailPattern = ("^[a-zA-Z0-9_!#\$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+\$").toRegex()

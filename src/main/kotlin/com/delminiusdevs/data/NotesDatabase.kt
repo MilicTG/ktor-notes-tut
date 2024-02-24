@@ -5,10 +5,14 @@ import com.delminiusdevs.data.model.User
 import com.delminiusdevs.util.checkHashForPassword
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Filters.eq
+import com.mongodb.client.model.Filters.not
+import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.toList
 
 
 class NotesDatabase : NoteDAO {
@@ -42,6 +46,44 @@ class NotesDatabase : NoteDAO {
 
     override suspend fun registerUser(user: User): Boolean {
         return users.insertOne(user).wasAcknowledged()
+        client.close()
+    }
+
+    override suspend fun getUserIdWithEmail(email: String): String {
+        return users.find(Filters.eq(User::email.name, email)).firstOrNull()?.id ?: ""
+        client.close()
+    }
+
+    override suspend fun getAllNotesOfUser(userId: String): List<Note> {
+        return notes.find(Filters.eq(Note::owner.name, userId)).toList()
+        client.close()
+    }
+
+    override suspend fun insertNote(note: Note): Boolean {
+        return notes.insertOne(note).wasAcknowledged()
+        client.close()
+    }
+
+    override suspend fun updateNote(note: Note): Boolean {
+        notes.updateOne(Filters.eq(note.id), Updates.set(Note::title.name, note.title))
+        notes.updateOne(Filters.eq(note.id), Updates.set(Note::text.name, note.text))
+        return notes.updateOne(Filters.eq(note.id), Updates.set(Note::timestamp.name, System.currentTimeMillis()))
+            .wasAcknowledged()
+        client.close()
+    }
+
+    override suspend fun checkIfNoteExist(noteId: String): Boolean {
+        return notes.find(Filters.eq(noteId)) != null
+        client.close()
+    }
+
+    override suspend fun isNoteOwnedBy(noteId: String, userId: String): Boolean {
+        return notes.find(Filters.eq(noteId))?.firstOrNull()?.owner == userId
+        client.close()
+    }
+
+    override suspend fun deleteNote(noteId: String): Boolean {
+        return notes.deleteOne(Filters.eq(noteId)).wasAcknowledged()
         client.close()
     }
 
