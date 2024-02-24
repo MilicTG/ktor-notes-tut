@@ -35,3 +35,20 @@ dependencies {
     implementation("io.ktor:ktor-serialization-gson:$ktor_version")
     implementation("io.ktor:ktor-server-call-logging:$ktor_version")
 }
+
+task("stage") {
+    dependsOn("shadowJar")
+}
+
+ktor {
+    docker {
+        jreVersion.set(JavaVersion.VERSION_17)
+        portMappings.set(listOf(
+            io.ktor.plugin.features.DockerPortMapping(
+                80,
+                8080,
+                io.ktor.plugin.features.DockerPortMappingProtocol.TCP
+            )
+        ))
+    }
+}
